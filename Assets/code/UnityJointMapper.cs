@@ -475,10 +475,10 @@ public class UnityJointMapper : MonoBehaviour
         
         // GUI 영역 설정 (화면 우측 상단)
         GUILayout.BeginArea(new Rect(370, 10, 350, 450));
-        GUILayout.Label("🔧 Unity Joint Mapping Info", GUI.skin.box);
+        GUILayout.Label("Unity Joint Mapping Info", GUI.skin.box);
         
         // === 기본 관절 매핑 정보 표시 ===
-        GUILayout.Label("📋 기본 관절 매핑:");
+        GUILayout.Label("기본 관절 매핑:");
         foreach (var mapping in jointMappings)
         {
             if (!mapping.isGripperJoint)
@@ -490,7 +490,7 @@ public class UnityJointMapper : MonoBehaviour
         GUILayout.Space(10);
         
         // === 그리퍼 매핑 정보 표시 ===
-        GUILayout.Label("🤖 그리퍼 매핑:");
+        GUILayout.Label("그리퍼 매핑:");
         foreach (var mapping in jointMappings)
         {
             if (mapping.isGripperJoint)
@@ -502,13 +502,13 @@ public class UnityJointMapper : MonoBehaviour
         GUILayout.Space(10);
         
         // === 현재 설정 상태 표시 ===
-        GUILayout.Label($"그리퍼 매핑: {(enableGripperMapping ? "✅ ON" : "❌ OFF")}");
-        GUILayout.Label($"그리퍼 동기화: {(syncGripperFingers ? "✅ ON" : "❌ OFF")}");
+        GUILayout.Label($"그리퍼 매핑: {(enableGripperMapping ? "ON" : "OFF")}");
+        GUILayout.Label($"그리퍼 동기화: {(syncGripperFingers ? "ON" : "OFF")}");
         
         GUILayout.Space(10);
         
         // === 그리퍼 동기화 토글 버튼 ===
-        if (GUILayout.Button("🔄 그리퍼 동기화 토글"))
+        if (GUILayout.Button("그리퍼 동기화 토글"))
         {
             SetGripperSync(!syncGripperFingers);
         }

@@ -123,7 +123,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
     public void InitializeSystem()
     {
         if (enableDebugLog)
-            Debug.Log("🚀 WX250s Unity 팔로워 시스템 초기화 시작...");
+            Debug.Log("WX250s Unity 팔로워 시스템 초기화 시작...");
         
         // === 컴포넌트 자동 할당 ===
         // Inspector에서 수동으로 할당하지 않은 경우 같은 GameObject에서 자동으로 찾기
@@ -139,19 +139,19 @@ public class WX250sUnityFollowerController : MonoBehaviour
         // === 필수 컴포넌트 존재 확인 ===
         if (ros2Bridge == null)
         {
-            Debug.LogError("❌ ROS2Bridge 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
+            Debug.LogError("ROS2Bridge 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
             return;
         }
         
         if (mujocoController == null)
         {
-            Debug.LogError("❌ WX250sMuJoCoController 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
+            Debug.LogError("WX250sMuJoCoController 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
             return;
         }
         
         if (jointMapper == null)
         {
-            Debug.LogError("❌ UnityJointMapper 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
+            Debug.LogError("UnityJointMapper 컴포넌트를 찾을 수 없습니다! 같은 GameObject에 추가해주세요.");
             return;
         }
         
@@ -161,7 +161,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
         isInitialized = true;
         
         if (enableDebugLog)
-            Debug.Log("✅ WX250s Unity 팔로워 시스템 초기화 완료!");
+            Debug.Log("WX250s Unity 팔로워 시스템 초기화 완료!");
     }
     
     /// <summary>
@@ -190,7 +190,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
             {
                 isConnected = true;
                 if (enableDebugLog)
-                    Debug.Log("✅ ROS2 연결 성공!");
+                    Debug.Log("ROS2 연결 성공!");
                 break;
             }
             
@@ -200,7 +200,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
         // 타임아웃 시 경고 메시지
         if (!isConnected)
         {
-            Debug.LogWarning($"⚠️ ROS2 연결 시간 초과 ({connectionTimeout}초)");
+            Debug.LogWarning($"ROS2 연결 시간 초과 ({connectionTimeout}초)");
         }
     }
     
@@ -247,12 +247,12 @@ public class WX250sUnityFollowerController : MonoBehaviour
                 if (isConnected)
                 {
                     if (enableDebugLog)
-                        Debug.Log("✅ ROS2 연결 복구됨");
+                        Debug.Log("ROS2 연결 복구됨");
                 }
                 else
                 {
                     if (enableDebugLog)
-                        Debug.LogWarning("⚠️ ROS2 연결 끊어짐");
+                        Debug.LogWarning("ROS2 연결 끊어짐");
                 }
             }
         }
@@ -287,7 +287,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
             {
                 lastGripperValue = currentGripper;
                 if (enableDebugLog)
-                    Debug.Log($"🤖 그리퍼 값 변경: {currentGripper:F3}");
+                    Debug.Log($"그리퍼 값 변경: {currentGripper:F3}");
             }
         }
     }
@@ -339,7 +339,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
             }
             
             if (enableDebugLog)
-                Debug.Log("🔄 로봇 위치 리셋 완료");
+                Debug.Log("로봇 위치 리셋 완료");
         }
     }
     
@@ -406,7 +406,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
         {
             mujocoController.SetGripperValue(value);
             if (enableDebugLog)
-                Debug.Log($"🤖 그리퍼 값 설정: {value:F3}");
+                Debug.Log($"그리퍼 값 설정: {value:F3}");
         }
     }
     
@@ -452,7 +452,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
             }
             
             if (enableDebugLog)
-                Debug.Log($"🤖 그리퍼 동기화: {(!currentSync ? "✅ ON" : "❌ OFF")}");
+                Debug.Log($"그리퍼 동기화: {(!currentSync ? "ON" : "OFF")}");
         }
     }
     
@@ -496,28 +496,28 @@ public class WX250sUnityFollowerController : MonoBehaviour
         
         // GUI 영역 설정 (화면 좌측 하단)
         GUILayout.BeginArea(new Rect(10, 470, 400, 300));
-        GUILayout.Label("🎮 WX250s Unity Follower System", GUI.skin.box);
+        GUILayout.Label("WX250s Unity Follower System", GUI.skin.box);
         
         // === 시스템 상태 정보 표시 ===
-        GUILayout.Label($"🔧 초기화 상태: {(isInitialized ? "✅ 완료" : "❌ 미완료")}");
-        GUILayout.Label($"🔗 ROS2 연결: {(isConnected ? "✅ 연결됨" : "❌ 연결 끊어짐")}");
-        GUILayout.Label($"📨 수신 메시지: {receivedMessageCount}개");
-        GUILayout.Label($"⏰ 마지막 업데이트: {Time.time - lastUpdateTime:F1}초 전");
+        GUILayout.Label($"초기화 상태: {(isInitialized ? "완료" : "미완료")}");
+        GUILayout.Label($"ROS2 연결: {(isConnected ? "연결됨" : "연결 끊어짐")}");
+        GUILayout.Label($"수신 메시지: {receivedMessageCount}개");
+        GUILayout.Label($"마지막 업데이트: {Time.time - lastUpdateTime:F1}초 전");
         
         if (isConnected)
         {
-            GUILayout.Label($"⏱️ 연결 시간: {Time.time - connectionStartTime:F1}초");
+            GUILayout.Label($"연결 시간: {Time.time - connectionStartTime:F1}초");
         }
         
         GUILayout.Space(10);
         
         // === 시스템 제어 버튼들 ===
-        if (GUILayout.Button("🔄 연결 재시도"))
+        if (GUILayout.Button("연결 재시도"))
         {
             RestartConnection();
         }
         
-        if (GUILayout.Button("🔄 로봇 리셋"))
+        if (GUILayout.Button("로봇 리셋"))
         {
             ResetRobot();
         }
@@ -526,28 +526,28 @@ public class WX250sUnityFollowerController : MonoBehaviour
         if (showGripperControls && enableGripperControl)
         {
             GUILayout.Space(10);
-            GUILayout.Label("🤖 그리퍼 제어:");
+            GUILayout.Label("그리퍼 제어:");
             
             // 그리퍼 제어 버튼들 (가로 배치)
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("🤖 열기"))
+            if (GUILayout.Button("열기"))
             {
                 OpenGripper();
             }
             
-            if (GUILayout.Button("🤖 닫기"))
+            if (GUILayout.Button("닫기"))
             {
                 CloseGripper();
             }
             
-            if (GUILayout.Button("🧪 테스트"))
+            if (GUILayout.Button("테스트"))
             {
                 SetGripperValue(gripperTestValue);
             }
             GUILayout.EndHorizontal();
             
             // 그리퍼 동기화 토글 버튼
-            if (GUILayout.Button("🔄 그리퍼 동기화 토글"))
+            if (GUILayout.Button("그리퍼 동기화 토글"))
             {
                 ToggleGripperSync();
             }
@@ -565,7 +565,7 @@ public class WX250sUnityFollowerController : MonoBehaviour
     void OnDestroy()
     {
         if (enableDebugLog)
-            Debug.Log("👋 WX250s Unity 팔로워 시스템 종료");
+            Debug.Log("WX250s Unity 팔로워 시스템 종료");
     }
 }
 

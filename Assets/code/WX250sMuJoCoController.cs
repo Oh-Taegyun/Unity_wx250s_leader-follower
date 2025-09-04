@@ -134,7 +134,7 @@ public class WX250sMuJoCoController : MonoBehaviour
     {
         if (modelRoot == null)
         {
-            Debug.LogError("❌ MuJoCo 모델 루트가 설정되지 않았습니다! Inspector에서 modelRoot를 설정해주세요.");
+            Debug.LogError("MuJoCo 모델 루트가 설정되지 않았습니다! Inspector에서 modelRoot를 설정해주세요.");
             return;
         }
         
@@ -209,7 +209,7 @@ public class WX250sMuJoCoController : MonoBehaviour
     {
         if (jointState == null || jointState.name == null || jointState.position == null)
         {
-            Debug.LogWarning("⚠️ 잘못된 관절 상태 메시지");
+            Debug.LogWarning("잘못된 관절 상태 메시지");
             return;
         }
         
@@ -218,7 +218,7 @@ public class WX250sMuJoCoController : MonoBehaviour
         
         if (showDebugInfo)
         {
-            Debug.Log($"🎯 관절 상태 업데이트: {string.Join(", ", targetPositions)}");
+            Debug.Log($"관절 상태 업데이트: {string.Join(", ", targetPositions)}");
         }
     }
     
@@ -234,7 +234,7 @@ public class WX250sMuJoCoController : MonoBehaviour
     {
         if (trajectory == null || trajectory.points == null || trajectory.points.Length == 0)
         {
-            Debug.LogWarning("⚠️ 잘못된 궤적 메시지");
+            Debug.LogWarning("잘못된 궤적 메시지");
             return;
         }
         
@@ -251,7 +251,7 @@ public class WX250sMuJoCoController : MonoBehaviour
             
             if (showDebugInfo)
             {
-                Debug.Log($"🎯 궤적 실행: {string.Join(", ", firstPoint.positions)}");
+                Debug.Log($"궤적 실행: {string.Join(", ", firstPoint.positions)}");
             }
         }
     }
@@ -389,7 +389,7 @@ public class WX250sMuJoCoController : MonoBehaviour
             currentPositions[7] = avgPos;  // right_finger
             
             if (showDebugInfo)
-                Debug.LogWarning($"🤖 그리퍼 동기화 보정: {leftPos:F3} → {avgPos:F3}");
+                Debug.LogWarning($"그리퍼 동기화 보정: {leftPos:F3} → {avgPos:F3}");
         }
     }
     
@@ -430,12 +430,12 @@ public class WX250sMuJoCoController : MonoBehaviour
                 else
                 {
                     if (showDebugInfo)
-                        Debug.LogWarning($"⚠️ 액추에이터를 찾을 수 없음: {targetJointName}");
+                        Debug.LogWarning($"액추에이터를 찾을 수 없음: {targetJointName}");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"❌ 관절 {jointNames[i]} 제어 오류: {ex.Message}");
+                Debug.LogError($"관절 {jointNames[i]} 제어 오류: {ex.Message}");
             }
         }
     }
@@ -480,7 +480,7 @@ public class WX250sMuJoCoController : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError($"❌ 관절 {jointNames[i]} 상태 읽기 오류: {ex.Message}");
+                Debug.LogError($"관절 {jointNames[i]} 상태 읽기 오류: {ex.Message}");
             }
         }
     }
@@ -608,24 +608,24 @@ public class WX250sMuJoCoController : MonoBehaviour
         
         // GUI 영역 설정 (화면 좌측 상단)
         GUILayout.BeginArea(new Rect(10, 10, 350, 450));
-        GUILayout.Label("🤖 WX250s Unity MuJoCo Controller", GUI.skin.box);
+        GUILayout.Label("WX250s Unity MuJoCo Controller", GUI.skin.box);
         
         // === 제어 설정 정보 표시 ===
-        GUILayout.Label($"⚙️ 업데이트 주기: {updateRate}Hz");
-        GUILayout.Label($"🌊 부드러운 움직임: {(enableSmoothing ? "✅ ON" : "❌ OFF")}");
-        GUILayout.Label($"🤖 그리퍼 동기화: {(enableGripperSync ? "✅ ON" : "❌ OFF")}");
+        GUILayout.Label($"업데이트 주기: {updateRate}Hz");
+        GUILayout.Label($"부드러운 움직임: {(enableSmoothing ? "ON" : "OFF")}");
+        GUILayout.Label($"그리퍼 동기화: {(enableGripperSync ? "ON" : "OFF")}");
         
         GUILayout.Space(10);
         
         // === 관절 상태 표시 ===
-        GUILayout.Label("📊 관절 상태:");
+        GUILayout.Label("관절 상태:");
         
         for (int i = 0; i < jointNames.Length; i++)
         {
             string jointInfo = $"{jointNames[i]}: {currentPositions[i]:F3} → {targetPositions[i]:F3}";
             if (i >= 6) // 그리퍼 관절들
             {
-                jointInfo += " [🤖 GRIPPER]";
+                jointInfo += " [GRIPPER]";
             }
             GUILayout.Label(jointInfo);
         }
@@ -633,17 +633,17 @@ public class WX250sMuJoCoController : MonoBehaviour
         GUILayout.Space(10);
         
         // === 그리퍼 상태 표시 ===
-        GUILayout.Label($"🤖 그리퍼 값: {currentGripperValue:F3} → {targetGripperValue:F3}");
+        GUILayout.Label($"그리퍼 값: {currentGripperValue:F3} → {targetGripperValue:F3}");
         
         GUILayout.Space(10);
         
         // === 그리퍼 제어 버튼들 ===
-        if (GUILayout.Button("🤖 그리퍼 열기"))
+        if (GUILayout.Button("그리퍼 열기"))
         {
             SetGripperValue(0f);
         }
         
-        if (GUILayout.Button("🤖 그리퍼 닫기"))
+        if (GUILayout.Button("그리퍼 닫기"))
         {
             SetGripperValue(1f);
         }

@@ -133,7 +133,7 @@ public class ROS2Bridge : MonoBehaviour
         }
         else
         {
-            Debug.Log("✅ MuJoCo 컨트롤러 가져옴");
+            Debug.Log("MuJoCo 컨트롤러 가져옴");
         }
         
         // ROS2 연결 시작
@@ -164,11 +164,11 @@ public class ROS2Bridge : MonoBehaviour
             SubscribeToTopic();
             
             if (enableDebugLog)
-                Debug.Log($"🔗 ROS2 Bridge 연결 시도: {rosIPAddress}:{rosPort}");
+                Debug.Log($"ROS2 Bridge 연결 시도: {rosIPAddress}:{rosPort}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ ROS2 Bridge 연결 실패: {ex.Message}");
+            Debug.LogError($"ROS2 Bridge 연결 실패: {ex.Message}");
         }
     }
     
@@ -194,12 +194,12 @@ public class ROS2Bridge : MonoBehaviour
                 if (isConnected)
                 {
                     if (enableDebugLog)
-                        Debug.Log("✅ ROS2 Bridge 연결 성공!");
+                        Debug.Log("ROS2 Bridge 연결 성공!");
                 }
                 else
                 {
                     if (enableDebugLog)
-                        Debug.LogWarning($"⚠️ ROS2 Bridge 연결 끊어짐 (마지막 메시지: {timeSinceLastMessage:F1}초 전)");
+                        Debug.LogWarning($"ROS2 Bridge 연결 끊어짐 (마지막 메시지: {timeSinceLastMessage:F1}초 전)");
                 }
             }
             
@@ -225,7 +225,7 @@ public class ROS2Bridge : MonoBehaviour
         ros.Subscribe<JointTrajectoryMsg>(topicName, OnTrajectoryMessage);
         
         if (enableDebugLog)
-            Debug.Log($"📡 토픽 구독 요청: {topicName}");
+            Debug.Log($"토픽 구독 요청: {topicName}");
     }
     
     /// <summary>
@@ -243,7 +243,7 @@ public class ROS2Bridge : MonoBehaviour
             lastMessageTime = Time.time;      // 마지막 수신 시간 업데이트 (연결 상태 판단용)
             
             if (enableDebugLog)
-                Debug.Log($"🎯 궤적 명령 수신: {msg.joint_names.Length}개 관절 (메시지 #{receivedMessageCount})");
+                Debug.Log($"궤적 명령 수신: {msg.joint_names.Length}개 관절 (메시지 #{receivedMessageCount})");
             
             // MuJoCo 컨트롤러에 궤적 명령 전달
             if (mujocoController != null)
@@ -255,16 +255,16 @@ public class ROS2Bridge : MonoBehaviour
                 mujocoController.ExecuteTrajectory(trajectoryData);
                 
                 if (enableDebugLog)
-                    Debug.Log("✅ MuJoCo 컨트롤러에 궤적 전달 완료");
+                    Debug.Log("MuJoCo 컨트롤러에 궤적 전달 완료");
             }
             else
             {
-                Debug.LogWarning("⚠️ MuJoCo 컨트롤러가 null입니다!");
+                Debug.LogWarning("MuJoCo 컨트롤러가 null입니다!");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ 메시지 처리 오류: {ex.Message}");
+            Debug.LogError($"메시지 처리 오류: {ex.Message}");
         }
     }
     
@@ -343,7 +343,7 @@ public class ROS2Bridge : MonoBehaviour
         {
             // ROSTCPConnector는 자동으로 연결을 관리하므로 별도 정리 불필요
             if (enableDebugLog)
-                Debug.Log("🧹 ROS2 Bridge 정리 완료");
+                Debug.Log("ROS2 Bridge 정리 완료");
         }
     }
     
@@ -354,7 +354,7 @@ public class ROS2Bridge : MonoBehaviour
     void OnApplicationQuit()
     {
         if (enableDebugLog)
-            Debug.Log("👋 ROS2 Bridge 애플리케이션 종료");
+            Debug.Log("ROS2 Bridge 애플리케이션 종료");
     }
     
     // === 공개 API 메서드들 ===
