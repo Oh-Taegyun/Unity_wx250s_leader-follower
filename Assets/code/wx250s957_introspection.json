@@ -1,0 +1,202 @@
+{
+    "robotRootName": "wx250s957",
+    "bodies": [
+        {
+            "name": "wx250s/base_link",
+            "path": "wx250s957/wx250s/base_link",
+            "parent": "wx250s957"
+        },
+        {
+            "name": "wx250s/shoulder_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link",
+            "parent": "wx250s/base_link"
+        },
+        {
+            "name": "wx250s/upper_arm_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link",
+            "parent": "wx250s/shoulder_link"
+        },
+        {
+            "name": "wx250s/upper_forearm_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link",
+            "parent": "wx250s/upper_arm_link"
+        },
+        {
+            "name": "wx250s/lower_forearm_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link/wx250s/lower_forearm_link",
+            "parent": "wx250s/upper_forearm_link"
+        },
+        {
+            "name": "wx250s/wrist_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link/wx250s/lower_forearm_link/wx250s/wrist_link",
+            "parent": "wx250s/lower_forearm_link"
+        },
+        {
+            "name": "wx250s/gripper_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link/wx250s/lower_forearm_link/wx250s/wrist_link/wx250s/gripper_link",
+            "parent": "wx250s/wrist_link"
+        },
+        {
+            "name": "wx250s/left_finger_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link/wx250s/lower_forearm_link/wx250s/wrist_link/wx250s/gripper_link/wx250s/left_finger_link",
+            "parent": "wx250s/gripper_link"
+        },
+        {
+            "name": "wx250s/right_finger_link",
+            "path": "wx250s957/wx250s/base_link/wx250s/shoulder_link/wx250s/upper_arm_link/wx250s/upper_forearm_link/wx250s/lower_forearm_link/wx250s/wrist_link/wx250s/gripper_link/wx250s/right_finger_link",
+            "parent": "wx250s/gripper_link"
+        }
+    ],
+    "joints": [
+        {
+            "name": "waist",
+            "type": "hinge",
+            "parentBody": "wx250s/shoulder_link",
+            "childBody": "wx250s/shoulder_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "waist"
+            ]
+        },
+        {
+            "name": "shoulder",
+            "type": "hinge",
+            "parentBody": "wx250s/upper_arm_link",
+            "childBody": "wx250s/upper_arm_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "shoulder"
+            ]
+        },
+        {
+            "name": "elbow",
+            "type": "hinge",
+            "parentBody": "wx250s/upper_forearm_link",
+            "childBody": "wx250s/upper_forearm_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "elbow"
+            ]
+        },
+        {
+            "name": "forearm_roll",
+            "type": "hinge",
+            "parentBody": "wx250s/lower_forearm_link",
+            "childBody": "wx250s/lower_forearm_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "forearm_roll"
+            ]
+        },
+        {
+            "name": "wrist_angle",
+            "type": "hinge",
+            "parentBody": "wx250s/wrist_link",
+            "childBody": "wx250s/wrist_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "wrist_angle"
+            ]
+        },
+        {
+            "name": "wrist_rotate",
+            "type": "hinge",
+            "parentBody": "wx250s/gripper_link",
+            "childBody": "wx250s/gripper_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "wrist_rotate"
+            ]
+        },
+        {
+            "name": "left_finger",
+            "type": "slide",
+            "parentBody": "wx250s/left_finger_link",
+            "childBody": "wx250s/left_finger_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": [
+                "gripper"
+            ]
+        },
+        {
+            "name": "right_finger",
+            "type": "slide",
+            "parentBody": "wx250s/right_finger_link",
+            "childBody": "wx250s/right_finger_link",
+            "limited": false,
+            "range": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "axis": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "actuators": []
+        }
+    ]
+}
