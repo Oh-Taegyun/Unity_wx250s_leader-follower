@@ -1,3 +1,4 @@
+
 /*
  * ROS2Bridge_ROSTCPConnector.cs - ROSTCPConnector 사용 버전
  * 
@@ -281,8 +282,7 @@ public class ROS2Bridge : MonoBehaviour
         var points = new JointTrajectoryPoint[rosMsg.points.Length];
         for (int i = 0; i < rosMsg.points.Length; i++)
         {
-            points[i] = new JointTrajectoryPoint
-            {
+            points[i] = new JointTrajectoryPoint {
                 // double 배열을 float 배열로 변환 (Unity는 float를 주로 사용)
                 positions = ConvertDoubleArrayToFloatArray(rosMsg.points[i].positions),
                 velocities = ConvertDoubleArrayToFloatArray(rosMsg.points[i].velocities),
@@ -297,8 +297,7 @@ public class ROS2Bridge : MonoBehaviour
         }
         
         // 최종 메시지 객체 생성
-        return new JointTrajectoryMessage
-        {
+        return new JointTrajectoryMessage {
             header = new Header
             {
                 sec = rosMsg.header.stamp.sec,

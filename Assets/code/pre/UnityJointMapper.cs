@@ -135,8 +135,8 @@ public class UnityJointMapper : MonoBehaviour
         
         if (showMappingInfo)
         {
-            Debug.Log($"🔧 Unity 관절 매핑 초기화 완료: {mappingDict.Count}개 매핑");
-            Debug.Log($"🤖 그리퍼 매핑: {gripperMappings.Count}개");
+            Debug.Log($"Unity 관절 매핑 초기화 완료: {mappingDict.Count}개 매핑");
+            Debug.Log($"그리퍼 매핑: {gripperMappings.Count}개");
         }
     }
     

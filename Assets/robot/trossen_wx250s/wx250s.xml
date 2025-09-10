@@ -84,7 +84,7 @@
                   <body name="wx250s/left_finger_link" pos="0.066 0 0">
                     <inertial pos="0.013816 0 0" quat="0.705384 0.705384 -0.0493271 -0.0493271" mass="0.016246"
                       diaginertia="4.79509e-06 3.7467e-06 1.48651e-06"/>
-                    <joint name="left_finger" axis="0 1 0" type="slide" range="0.015 0.037"/>
+                    <joint name="left_finger" axis="0 1 0" type="slide" range="0.015 0.04"/>
                     <geom pos="0 0.005 0" quat="0 0 0 -1" mesh="wx250s_10_gripper_finger" class="visual"/>
                     <geom pos="0 0.005 0" quat="0 0 0 -1" mesh="wx250s_10_gripper_finger" class="collision"/>
                     <geom name="left/left_g0" pos="0.042 -0.009 0.012" class="sphere_collision"/>
@@ -93,7 +93,7 @@
                   <body name="wx250s/right_finger_link" pos="0.066 0 0">
                     <inertial pos="0.013816 0 0" quat="0.705384 0.705384 0.0493271 0.0493271" mass="0.016246"
                       diaginertia="4.79509e-06 3.7467e-06 1.48651e-06"/>
-                    <joint name="right_finger" axis="0 1 0" type="slide" range="-0.037 -0.015"/>
+                    <joint name="right_finger" axis="0 1 0" type="slide" range="-0.04 -0.015"/>
                     <geom pos="0 -0.005 0" quat="0 0 1 0" mesh="wx250s_10_gripper_finger" class="visual"/>
                     <geom pos="0 -0.005 0" quat="0 0 1 0" mesh="wx250s_10_gripper_finger" class="collision"/>
                     <geom name="right/right_g0" pos="0.042 0.009 0.012" class="sphere_collision"/>

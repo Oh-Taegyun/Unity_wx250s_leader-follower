@@ -1,0 +1,20 @@
+<mujoco model="grippable_box">
+  <!-- 기본값: 모든 geom 마찰/접촉을 조금 단단하게 -->
+  <default>
+    <geom friction="1.2 0.05 0.01" condim="3"
+          solref="0.01 1" solimp="0.9 0.95 0.001"/>
+  </default>
+
+  <option timestep="0.002"/>
+
+  <worldbody>
+    <!-- 자유롭게 들 수 있는 박스: Free joint 필수 -->
+    <body name="box_body" pos="0 0 0.05">
+      <freejoint/>  <!-- 없으면 '고정물'이라 절대 안 들림 -->
+      <!-- size는 반-길이(half-extent). 아래는 6cm 정육면체 -->
+      <geom name="box_geom" type="box" size="0.03 0.03 0.03"
+            contype="1" conaffinity="1" density="500"/>
+    </body>
+  </worldbody>
+</mujoco>
+

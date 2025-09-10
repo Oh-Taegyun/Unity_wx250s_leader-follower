@@ -44,9 +44,6 @@ public class WX250sMuJoCoController : MonoBehaviour
     [Tooltip("MuJoCo 시뮬레이션 모델의 루트 Transform (모든 관절과 액추에이터의 부모)")]
     public Transform modelRoot;
     
-    [Tooltip("MuJoCo 모델 파일 경로 (참고용, 실제 로딩은 Unity에서 처리)")]
-    public string modelPath = "Assets/Models/wx250s.xml";
-    
     [Header("관절 설정 - Unity MuJoCo 구조")]
     [Tooltip("Unity MuJoCo에서 사용하는 관절 이름 배열 (8개, 그리퍼는 left_finger, right_finger로 분할)")]
     public string[] jointNames = {
@@ -61,22 +58,13 @@ public class WX250sMuJoCoController : MonoBehaviour
     };
     
     [Header("제어 설정")]
-    [Tooltip("위치 제어 게인 (PID 제어기의 P 게인, 높을수록 빠른 응답)")]
-    public float positionGain = 1000f;
-    
-    [Tooltip("속도 제어 게인 (PID 제어기의 D 게인, 높을수록 안정적)")]
-    public float velocityGain = 100f;
-    
-    [Tooltip("최대 힘/토크 제한 (관절별 최대 출력 제한, 안전을 위해 설정)")]
-    public float maxForce = 1000f;
-    
     [Tooltip("제어 업데이트 주기 (Hz, 높을수록 정밀하지만 CPU 부하 증가)")]
     public float updateRate = 100f;
     
     [Header("그리퍼 설정")]
     [Tooltip("그리퍼 손가락 동기화 활성화 (left_finger = right_finger)")]
     public bool enableGripperSync = true;
-    
+
     [Tooltip("그리퍼 동기화 허용 오차 (이 값보다 작은 차이는 무시)")]
     public float gripperSyncTolerance = 0.001f;
     
@@ -88,7 +76,7 @@ public class WX250sMuJoCoController : MonoBehaviour
     public bool enableSmoothing = true;
     
     [Tooltip("부드러운 움직임 보간 계수 (0~1, 높을수록 빠른 움직임)")]
-    public float smoothingFactor = 0.1f;
+    public float smoothingFactor = 0.5f;
     
     // === 내부 상태 변수들 ===
     
@@ -109,6 +97,17 @@ public class WX250sMuJoCoController : MonoBehaviour
     private float currentGripperValue = 0f;  // 현재 그리퍼 값 (0: 열림, 1: 닫힘)
     private float targetGripperValue = 0f;   // 목표 그리퍼 값 (0: 열림, 1: 닫힘)
     
+    // ROS2 → Unity 관절 매핑 (값, 방향)
+    private static readonly (int index, bool invert)[] ROS2_TO_UNITY_MAPPING = {
+        (2, false), // 0: waist (방향 유지)
+        (1, true),  // 1: shoulder (방향 반전)
+        (3, true),  // 2: elbow (방향 반전)  
+        (4, true),  // 3: forearm_roll (방향 반전)
+        (5, false), // 4: wrist_angle (방향 유지)
+        (0, false), // 5: wrist_rotate (방향 유지)
+        (6, false)  // 6: gripper (방향 유지)
+    };
+
     /// <summary>
     /// Unity Start 메서드
     /// 스크립트가 활성화될 때 한 번 호출되어 모든 초기화 작업을 수행함
@@ -139,10 +138,11 @@ public class WX250sMuJoCoController : MonoBehaviour
         }
         
         // MuJoCo 모델 루트에서 액추에이터들 찾기
+        // 각 관절에 붙어있는 컴포넌트임
         var actuators = modelRoot.GetComponentsInChildren<MjActuator>(true);
         
         if (showDebugInfo)
-            Debug.Log($"🔧 MuJoCo 모델 초기화 완료: {jointNames.Length}개 관절, {actuators.Length}개 액추에이터");
+            Debug.Log($"MuJoCo 모델 초기화 완료: {jointNames.Length}개 관절, {actuators.Length}개 액추에이터");
     }
     
     /// <summary>
@@ -154,22 +154,10 @@ public class WX250sMuJoCoController : MonoBehaviour
     void InitializeJointMapping()
     {
         jointMapping = new Dictionary<string, int>();
-        
-        // ROS2 관절 이름 → Unity MuJoCo 관절 인덱스 매핑
-        // ROS2는 7개 관절, Unity MuJoCo는 8개 관절 (그리퍼 분할)
-        string[] ros2JointNames = {
-            "waist",        // 인덱스 0
-            "shoulder",     // 인덱스 1
-            "elbow",        // 인덱스 2
-            "forearm_roll", // 인덱스 3
-            "wrist_angle",  // 인덱스 4
-            "wrist_rotate", // 인덱스 5
-            "gripper"       // 인덱스 6 (Unity에서는 6,7번으로 분할)
-        };
-        
-        for (int i = 0; i < ros2JointNames.Length; i++)
+
+        for (int i = 0; i < jointNames.Length; i++)
         {
-            jointMapping[ros2JointNames[i]] = i;
+            jointMapping[jointNames[i]] = i;
         }
     }
     
@@ -197,30 +185,30 @@ public class WX250sMuJoCoController : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// ROS2에서 받은 관절 상태 메시지를 처리하는 메서드
-    /// 
-    /// ROS2Bridge에서 호출되는 메인 인터페이스입니다.
-    /// ROS2 JointState 메시지를 받아서 Unity MuJoCo 관절 형식으로 변환하고
-    /// 목표 위치로 설정합니다.
-    /// </summary>
-    /// <param name="jointState">ROS2 JointState 메시지 (관절 이름, 위치, 속도 포함)</param>
-    public void UpdateJointStates(JointStateMessage jointState)
-    {
-        if (jointState == null || jointState.name == null || jointState.position == null)
-        {
-            Debug.LogWarning("잘못된 관절 상태 메시지");
-            return;
-        }
+    // /// <summary>
+    // /// ROS2에서 받은 관절 상태 메시지를 처리하는 메서드
+    // /// 
+    // /// ROS2Bridge에서 호출되는 메인 인터페이스입니다.
+    // /// ROS2 JointState 메시지를 받아서 Unity MuJoCo 관절 형식으로 변환하고
+    // /// 목표 위치로 설정합니다.
+    // /// </summary>
+    // /// <param name="jointState">ROS2 JointState 메시지 (관절 이름, 위치, 속도 포함)</param>
+    // public void UpdateJointStates(JointStateMessage jointState)
+    // {
+    //     if (jointState == null || jointState.name == null || jointState.position == null)
+    //     {
+    //         Debug.LogWarning("잘못된 관절 상태 메시지");
+    //         return;
+    //     }
         
-        // ROS2 관절 데이터를 Unity MuJoCo 관절로 매핑
-        MapROS2ToUnityMuJoCo(jointState);
+    //     // ROS2 관절 데이터를 Unity MuJoCo 관절로 매핑
+    //     MapROS2ToUnityMuJoCo(jointState);
         
-        if (showDebugInfo)
-        {
-            Debug.Log($"관절 상태 업데이트: {string.Join(", ", targetPositions)}");
-        }
-    }
+    //     if (showDebugInfo)
+    //     {
+    //         Debug.Log($"관절 상태 업데이트: {string.Join(", ", targetPositions)}");
+    //     }
+    // }
     
     /// <summary>
     /// ROS2에서 받은 궤적 명령을 처리하는 메서드
@@ -243,10 +231,22 @@ public class WX250sMuJoCoController : MonoBehaviour
         
         if (firstPoint.positions != null && firstPoint.positions.Length > 0)
         {
-            // 궤적 포인트의 관절 위치를 목표 위치로 설정
+            // ROS2 → Unity 관절 순서 매핑
             for (int i = 0; i < Mathf.Min(firstPoint.positions.Length, targetPositions.Length); i++)
             {
-                targetPositions[i] = firstPoint.positions[i];
+                if (i < ROS2_TO_UNITY_MAPPING.Length)
+                {
+                    var (unityIndex, invert) = ROS2_TO_UNITY_MAPPING[i];
+                    if (unityIndex < targetPositions.Length)
+                    {
+                        float value = firstPoint.positions[i];
+                        if (invert)
+                        {
+                            value = -value; // 방향 반전
+                        }
+                        targetPositions[unityIndex] = value;
+                    }
+                }
             }
             
             if (showDebugInfo)
@@ -254,49 +254,65 @@ public class WX250sMuJoCoController : MonoBehaviour
                 Debug.Log($"궤적 실행: {string.Join(", ", firstPoint.positions)}");
             }
         }
+
+        // 그리퍼 특별 처리 (ROS2 6번 → Unity 6,7번)
+        if (firstPoint.positions.Length > 6)
+        {
+            float rosGripperValue = firstPoint.positions[6];
+            
+            // 그리퍼 값을 이진화 처리
+            if (rosGripperValue < 0)
+            {
+                SetGripperValue(1f); // 완전 열림
+            }
+            else
+            {
+                SetGripperValue(0f); // 완전 닫힘
+            }
+        }
     }
     
-    /// <summary>
-    /// ROS2 관절 데이터를 Unity MuJoCo 형식으로 매핑하는 메서드
-    /// 
-    /// ROS2의 7개 관절을 Unity MuJoCo의 8개 관절로 변환합니다.
-    /// 그리퍼는 ROS2에서 1개이지만 Unity에서는 left_finger와 right_finger로 분할됩니다.
-    /// 
-    /// 매핑 과정:
-    /// 1. 기본 관절 6개 (waist ~ wrist_rotate) 1:1 매핑
-    /// 2. 그리퍼 관절 1개 (ROS2) → 2개 (Unity) 분할 매핑
-    /// 3. 그리퍼 동기화 (left_finger = right_finger)
-    /// </summary>
-    /// <param name="jointState">ROS2 관절 상태 메시지 (7개 관절 데이터)</param>
-    void MapROS2ToUnityMuJoCo(JointStateMessage jointState)
-    {
-        // === 기본 관절 매핑 (waist ~ wrist_rotate, 6개) ===
-        // ROS2와 Unity MuJoCo에서 동일한 순서로 1:1 매핑
-        for (int i = 0; i < 6; i++)
-        {
-            if (i < jointState.position.Length)
-            {
-                targetPositions[i] = jointState.position[i];  // 목표 위치 설정
-                if (jointState.velocity != null && i < jointState.velocity.Length)
-                {
-                    targetVelocities[i] = jointState.velocity[i];  // 목표 속도 설정
-                }
-            }
-        }
+    // /// <summary>
+    // /// ROS2 관절 데이터를 Unity MuJoCo 형식으로 매핑하는 메서드
+    // /// 
+    // /// ROS2의 7개 관절을 Unity MuJoCo의 8개 관절로 변환합니다.
+    // /// 그리퍼는 ROS2에서 1개이지만 Unity에서는 left_finger와 right_finger로 분할됩니다.
+    // /// 
+    // /// 매핑 과정:
+    // /// 1. 기본 관절 6개 (waist ~ wrist_rotate) 1:1 매핑
+    // /// 2. 그리퍼 관절 1개 (ROS2) → 2개 (Unity) 분할 매핑
+    // /// 3. 그리퍼 동기화 (left_finger = right_finger)
+    // /// </summary>
+    // /// <param name="jointState">ROS2 관절 상태 메시지 (7개 관절 데이터)</param>
+    // void MapROS2ToUnityMuJoCo(JointStateMessage jointState)
+    // {
+    //     // === 기본 관절 매핑 (waist ~ wrist_rotate, 6개) ===
+    //     // ROS2와 Unity MuJoCo에서 동일한 순서로 1:1 매핑
+    //     for (int i = 0; i < 6; i++)
+    //     {
+    //         if (i < jointState.position.Length)
+    //         {
+    //             targetPositions[i] = jointState.position[i];  // 목표 위치 설정
+    //             if (jointState.velocity != null && i < jointState.velocity.Length)
+    //             {
+    //                 targetVelocities[i] = jointState.velocity[i];  // 목표 속도 설정
+    //             }
+    //         }
+    //     }
         
-        // === 그리퍼 특별 처리 (ROS2 1개 → Unity MuJoCo 2개) ===
-        if (jointState.position.Length > 6)
-        {
-            targetGripperValue = jointState.position[6]; // ROS2 gripper 값 (인덱스 6)
+    //     // === 그리퍼 특별 처리 (ROS2 1개 → Unity MuJoCo 2개) ===
+    //     if (jointState.position.Length > 6)
+    //     {
+    //         targetGripperValue = jointState.position[6]; // ROS2 gripper 값 (인덱스 6)
             
-            if (enableGripperSync)
-            {
-                // left_finger와 right_finger를 동일한 값으로 설정
-                targetPositions[6] = targetGripperValue; // left_finger (인덱스 6)
-                targetPositions[7] = targetGripperValue; // right_finger (인덱스 7)
-            }
-        }
-    }
+    //         if (enableGripperSync)
+    //         {
+    //             // left_finger와 right_finger를 동일한 값으로 설정
+    //             targetPositions[6] = targetGripperValue; // left_finger (인덱스 6)
+    //             targetPositions[7] = targetGripperValue; // right_finger (인덱스 7)
+    //         }
+    //     }
+    // }
     
     /// <summary>
     /// Unity Update 루프 - 고정 주기로 MuJoCo 제어 실행
@@ -561,9 +577,13 @@ public class WX250sMuJoCoController : MonoBehaviour
     /// <param name="value">그리퍼 값 (0~1, 0: 열림, 1: 닫힘)</param>
     public void SetGripperValue(float value)
     {
-        targetGripperValue = value;
-        targetPositions[6] = value; // left_finger (인덱스 6)
-        targetPositions[7] = value; // right_finger (인덱스 7)
+        // 0~1 범위를 실제 물리적 범위로 변환
+        // 0 → -0.008 (완전 열림)
+        // 1 → 0.017 (완전 닫힘)
+        float physicalValue = Mathf.Lerp(0, 1, value);
+        targetGripperValue = physicalValue;
+        targetPositions[6] = targetGripperValue; // left_finger (인덱스 6)
+        targetPositions[7] = targetGripperValue; // right_finger (인덱스 7)
     }
     
     /// <summary>
@@ -633,17 +653,17 @@ public class WX250sMuJoCoController : MonoBehaviour
         GUILayout.Space(10);
         
         // === 그리퍼 상태 표시 ===
-        GUILayout.Label($"그리퍼 값: {currentGripperValue:F3} → {targetGripperValue:F3}");
+        GUILayout.Label($"그리퍼 값: {currentGripperValue:F3} → {targetGripperValue:F3} (0: 열림, 1: 닫힘)");
         
         GUILayout.Space(10);
         
         // === 그리퍼 제어 버튼들 ===
-        if (GUILayout.Button("그리퍼 열기"))
+        if (GUILayout.Button("그리퍼 닫기"))
         {
             SetGripperValue(0f);
         }
         
-        if (GUILayout.Button("그리퍼 닫기"))
+        if (GUILayout.Button("그리퍼 열기"))
         {
             SetGripperValue(1f);
         }
