@@ -2,12 +2,14 @@ using UnityEngine;
 using Unity.Robotics.ROSTCPConnector;
 using RosMessageTypes.Sensor;
 using RosMessageTypes.Std;
+using System;
 
 [RequireComponent(typeof(Camera))]
-public class Ros2ImagePublisher : MonoBehaviour
+public class top_view : MonoBehaviour
 {
     [Header("ROS")]
-    public string topicName = "/camera/color/image_raw";
+    public string rawTopicName = "/camera1/image_raw";
+    public string compressedTopicName = "/camera1/image_raw/compressed";
     public string encoding = "rgb8"; // "mono8", "bgr8" 등도 가능
 
     [Header("Publish Rate (Hz)")]
@@ -27,7 +29,8 @@ public class Ros2ImagePublisher : MonoBehaviour
     {
         _cam = GetComponent<Camera>();
         _ros = ROSConnection.GetOrCreateInstance();
-        _ros.RegisterPublisher<ImageMsg>(topicName);
+        _ros.RegisterPublisher<ImageMsg>(rawTopicName);
+        _ros.RegisterPublisher<CompressedImageMsg>(compressedTopicName);
 
         _rt = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
         _rt.Create();
@@ -65,13 +68,13 @@ public class Ros2ImagePublisher : MonoBehaviour
         // 픽셀 데이터 추출 (RGB24)
         byte[] rgbBytes = _tex2D.GetRawTextureData(); // size = width*height*3
 
-        // sensor_msgs/Image 구성
+        // Raw 이미지 메시지 구성
         var header = new HeaderMsg();
         // stamp는 Endpoint가 덮어쓰는 경우가 많지만, 명시하고 싶으면 Unity 시간으로 채워도 됨.
         // header.stamp = new RosMessageTypes.BuiltinInterfaces.TimeMsg(sec, nanosec);
         header.frame_id = "camera_color_optical_frame";
 
-        var msg = new ImageMsg
+        var rawMsg = new ImageMsg
         {
             header = header,
             height = (uint)height,
@@ -82,6 +85,18 @@ public class Ros2ImagePublisher : MonoBehaviour
             data = rgbBytes
         };
 
-        _ros.Publish(topicName, msg);
+        // JPEG로 압축
+        byte[] jpegBytes = _tex2D.EncodeToJPG(80); // 품질 80%
+
+        var compressedMsg = new CompressedImageMsg
+        {
+            header = header,
+            format = "jpeg",
+            data = jpegBytes
+        };
+
+        // 두 토픽으로 동시 발행
+        _ros.Publish(rawTopicName, rawMsg);
+        _ros.Publish(compressedTopicName, compressedMsg);
     }
 }

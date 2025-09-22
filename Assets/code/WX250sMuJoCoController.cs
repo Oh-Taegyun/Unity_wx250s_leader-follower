@@ -100,8 +100,8 @@ public class WX250sMuJoCoController : MonoBehaviour
     // ROS2 → Unity 관절 매핑 (값, 방향)
     private static readonly (int index, bool invert)[] ROS2_TO_UNITY_MAPPING = {
         (2, false), // 0: waist (방향 유지)
-        (1, true),  // 1: shoulder (방향 반전)
-        (3, true),  // 2: elbow (방향 반전)  
+        (1, false),  // 1: shoulder (방향 반전)
+        (3, false),  // 2: elbow (방향 반전)  
         (4, true),  // 3: forearm_roll (방향 반전)
         (5, false), // 4: wrist_angle (방향 유지)
         (0, false), // 5: wrist_rotate (방향 유지)
@@ -167,6 +167,30 @@ public class WX250sMuJoCoController : MonoBehaviour
     /// 모든 관절의 현재/목표 위치와 속도를 저장할 배열들을 생성하고
     /// 초기값을 0으로 설정합니다.
     /// </summary>
+    // void InitializeArrays()
+    // {
+    //     int jointCount = jointNames.Length;  // 8개 관절
+    //     currentPositions = new float[jointCount];   // 현재 관절 위치
+    //     targetPositions = new float[jointCount];    // 목표 관절 위치
+    //     currentVelocities = new float[jointCount];  // 현재 관절 속도
+    //     targetVelocities = new float[jointCount];   // 목표 관절 속도
+        
+    //     // 모든 관절을 0 위치로 초기화 (중립 상태)
+    //     for (int i = 0; i < jointCount; i++)
+    //     {
+    //         currentPositions[i] = 0f;   // 현재 위치: 0 (라디안)
+    //         targetPositions[i] = 0f;    // 목표 위치: 0 (라디안)
+    //         currentVelocities[i] = 0f;  // 현재 속도: 0 (라디안/초)
+    //         targetVelocities[i] = 0f;   // 목표 속도: 0 (라디안/초)
+    //     }
+    // }
+    
+    /// <summary>
+    /// 관절 상태 배열들 초기화 메서드 (새로운 초기 포즈)
+    /// 
+    /// 모든 관절의 현재/목표 위치와 속도를 저장할 배열들을 생성하고
+    /// 지정된 초기 포즈로 설정합니다.
+    /// </summary>
     void InitializeArrays()
     {
         int jointCount = jointNames.Length;  // 8개 관절
@@ -175,16 +199,49 @@ public class WX250sMuJoCoController : MonoBehaviour
         currentVelocities = new float[jointCount];  // 현재 관절 속도
         targetVelocities = new float[jointCount];   // 목표 관절 속도
         
-        // 모든 관절을 0 위치로 초기화 (중립 상태)
+        // ROS2 순서의 초기 포즈 (ROS2_TO_UNITY_MAPPING 적용 전)
+        float[] ros2InitialPositions = {
+            1.526f,    // 0: elbow
+            -1.698f,    // 1: shoulder
+            -0.101f,     // 2: forearm_roll
+            0.270f,    // 3: wrist_angle
+            0.089f,     // 4: wrist_rotate
+            -0.006f,     // 5: waist
+            0.000f          // 6: gripper
+        };
+        
+        // Unity MuJoCo 순서로 변환하여 초기 포즈 설정
         for (int i = 0; i < jointCount; i++)
         {
-            currentPositions[i] = 0f;   // 현재 위치: 0 (라디안)
-            targetPositions[i] = 0f;    // 목표 위치: 0 (라디안)
+            if (i < 6) // 기본 관절 6개 (waist ~ wrist_rotate)
+            {
+                // ROS2_TO_UNITY_MAPPING을 사용하여 ROS2 순서를 Unity 순서로 변환
+                if (i < ROS2_TO_UNITY_MAPPING.Length)
+                {
+                    var (unityIndex, invert) = ROS2_TO_UNITY_MAPPING[i];
+                    if (unityIndex < jointCount)
+                    {
+                        float value = ros2InitialPositions[i];
+                        // if (invert)
+                        // {
+                        //     value = -value; // 방향 반전
+                        // }
+                        currentPositions[unityIndex] = value;   // 현재 위치: 변환된 초기값
+                        targetPositions[unityIndex] = value;    // 목표 위치: 변환된 초기값
+                    }
+                }
+            }
+            else // 그리퍼 관절들 (left_finger, right_finger)
+            {
+                currentPositions[i] = 0f;   // 그리퍼는 열림 상태
+                targetPositions[i] = 0f;    // 그리퍼는 열림 상태
+            }
+            
             currentVelocities[i] = 0f;  // 현재 속도: 0 (라디안/초)
             targetVelocities[i] = 0f;   // 목표 속도: 0 (라디안/초)
         }
     }
-    
+
     // /// <summary>
     // /// ROS2에서 받은 관절 상태 메시지를 처리하는 메서드
     // /// 
@@ -240,10 +297,10 @@ public class WX250sMuJoCoController : MonoBehaviour
                     if (unityIndex < targetPositions.Length)
                     {
                         float value = firstPoint.positions[i];
-                        if (invert)
-                        {
-                            value = -value; // 방향 반전
-                        }
+                        // if (invert)
+                        // {
+                        //     value = -value; // 방향 반전
+                        // }
                         targetPositions[unityIndex] = value;
                     }
                 }
@@ -627,7 +684,7 @@ public class WX250sMuJoCoController : MonoBehaviour
         if (!showDebugInfo) return;
         
         // GUI 영역 설정 (화면 좌측 상단)
-        GUILayout.BeginArea(new Rect(10, 10, 350, 450));
+        GUILayout.BeginArea(new Rect(10, 10, 350, 550));
         GUILayout.Label("WX250s Unity MuJoCo Controller", GUI.skin.box);
         
         // === 제어 설정 정보 표시 ===
@@ -666,6 +723,14 @@ public class WX250sMuJoCoController : MonoBehaviour
         if (GUILayout.Button("그리퍼 열기"))
         {
             SetGripperValue(1f);
+        }
+        
+        GUILayout.Space(10);
+        
+        // === 씬 다시 불러오기 버튼 ===
+        if (GUILayout.Button("씬 다시 불러오기"))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
         
         GUILayout.EndArea();
